@@ -1,0 +1,99 @@
+# makefile for libpng using vbcc for WarpOS (PowerPC on Amiga)
+# Copyright (C) 2025
+#
+# This code is released under the libpng license.
+# For conditions of distribution and use, see the disclaimer
+# and license in png.h
+#
+# To use this makefile:
+#   cp scripts/makefile.vbcc.amiga68K makefile
+#   make
+
+# Location of the zlib library and include files
+# Adjust these paths according to your WarpOS zlib installation
+ZLIBINC = /opt/vbcc/local/Include_H
+
+# VBCC installation directory (adjust as needed)
+# or have it as a global env var
+#VBCC = /opt/vbcc
+
+# Compiler, linker, lib and other tools
+CC = vc +aos68k-posix
+LD = $(CC)
+
+# Cross-compiling from macOS, so use macOS commands
+CP = cp
+RM_F = rm -f
+
+# Compiler and linker flags for vbcc
+# Disable all SIMD/hardware optimizations (not available on WarpOS)
+NOHWOPT = -DPNG_ARM_NEON_OPT=0 -DPNG_MIPS_MSA_OPT=0 \
+          -DPNG_MIPS_MMI_OPT=0 -DPNG_POWERPC_VSX_OPT=0 \
+          -DPNG_INTEL_SSE_OPT=0 -DPNG_RISCV_RVV_OPT=0 \
+          -DPNG_LOONGARCH_LSX_OPT=0
+
+# vbcc compiler flags
+# Disable warnings for statements without effect(153) and var used before defined(171).
+# png_debug macro expands to ((void)0)
+# There are a lot of variables used as out var, which in vbcc terms is "undefined"
+CFLAGS = -O2 -speed -cpu=68020 -c99 -dontwarn=153,171 -I$(ZLIBINC) $(NOHWOPT)
+
+# Linker flags
+LIBS = -lz -lm -lamiga
+LIB = png.lib
+
+# File extensions
+EXEEXT =
+OBJEXT = .o
+
+# Pre-built configuration
+# See scripts/pnglibconf.mak for more options
+PNGLIBCONF_H_PREBUILT = scripts/pnglibconf.h.prebuilt
+
+# File lists
+OBJS = png$(OBJEXT) pngerror$(OBJEXT) pngget$(OBJEXT) pngmem$(OBJEXT) \
+       pngpread$(OBJEXT) pngread$(OBJEXT) pngrio$(OBJEXT) pngrtran$(OBJEXT) \
+       pngrutil$(OBJEXT) pngset$(OBJEXT) pngtrans$(OBJEXT) pngwio$(OBJEXT) \
+       pngwrite$(OBJEXT) pngwtran$(OBJEXT) pngwutil$(OBJEXT)
+
+# Targets
+all: static
+
+pnglibconf.h: $(PNGLIBCONF_H_PREBUILT)
+	$(CP) $(PNGLIBCONF_H_PREBUILT) pnglibconf.h
+
+.c$(OBJEXT):
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+static: png.lib pngtest$(EXEEXT)
+
+$(LIB): $(OBJS)
+	cat $(OBJS) > $@
+
+test: pngtest$(EXEEXT)
+	./pngtest$(EXEEXT)
+
+pngtest$(EXEEXT): pngtest$(OBJEXT) $(LIB)
+	$(LD) $(LDFLAGS) -o $@ pngtest$(OBJEXT) $(LIB) $(LIBS)
+
+clean:
+	$(RM_F) $(OBJS) pngtest$(OBJEXT) $(LIB) pngtest$(EXEEXT) pngout.png pnglibconf.h
+
+# Dependencies
+png$(OBJEXT):      png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngerror$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngget$(OBJEXT):   png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngmem$(OBJEXT):   png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngpread$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngread$(OBJEXT):  png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngrio$(OBJEXT):   png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngrtran$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngrutil$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngset$(OBJEXT):   png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngtrans$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngwio$(OBJEXT):   png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngwrite$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngwtran$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+pngwutil$(OBJEXT): png.h pngconf.h pnglibconf.h pngpriv.h pngstruct.h pnginfo.h pngdebug.h
+
+pngtest$(OBJEXT):  png.h pngconf.h pnglibconf.h
