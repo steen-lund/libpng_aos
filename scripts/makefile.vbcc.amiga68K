@@ -39,7 +39,7 @@ NOHWOPT = -DPNG_ARM_NEON_OPT=0 -DPNG_MIPS_MSA_OPT=0 \
 CFLAGS = -O2 -speed -cpu=68020 -c99 -dontwarn=153,171 -I$(ZLIBINC) $(NOHWOPT)
 
 # Linker flags
-LIBS = -lz -lm -lamiga
+LIBS = -lz -lmsoft -lamiga -lauto
 LIB = png.lib
 
 # File extensions
