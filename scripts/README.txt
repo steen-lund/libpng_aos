@@ -40,6 +40,8 @@ Scripts and makefiles for libpng
     makefile.sunos    =>  Sun makefile
     makefile.32sunu   =>  Sun Ultra 32-bit makefile
     makefile.64sunu   =>  Sun Ultra 64-bit makefile
+    makefile.vbcc.amiga68K => Amiga makefile using vbcc compiler
+    makefile.vbcc.amigaWOS => Amiga WarpOS makefile using vbcc compiler
     makefile.vcwin32  =>  makefile for Microsoft Visual C++ 4.0 and later
     makevms.com       =>  VMS build script
     smakefile.ppc     =>  AMIGA smakefile for SAS C V6.58/7.00 PPC compiler
